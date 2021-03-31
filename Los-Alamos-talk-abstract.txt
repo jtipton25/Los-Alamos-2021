@@ -1,0 +1,4 @@
+Improving Bayesian Computation for non-Gaussian spatial and spatio-temporal data
+
+In this talk, I will present different techniques and methods for improving computation in non-Gaussian spatio-temporal data. First, I present a Bayesian model for reconstructing paleoclimate from pollen sediment data. This model uses parallel likelihood evaluations and reduced-rank spatio-temporal processes to enable efficient computation. Next, I present a method for using parameter augmentation to enable fully conjugate inference for multinomial regression. Within this model framework, a multi-resolution spatio-temporal random process is defined to enable efficient scaling of inference to large datasets. Finally, I present modifications to recursive Bayesian inference to enable conjugate sampling of Gaussian spatial random effects with non-Gaussian likelihoods through two-stage inference.
+
