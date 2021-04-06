@@ -1,7 +1,7 @@
 ---
 title: "Improving Bayesian computation for non-Gaussian spatial and spatio-temporal data"
 author: "John Tipton"
-date: "4/6/2021"
+date: "4/7/2021"
 output: 
  ioslides_presentation:
     widescreen: true
