@@ -1,5 +1,5 @@
 ---
-title: "Improving Bayesian Computation for non-Gaussian spatial and spatio-temporal data"
+title: "Improving Bayesian computation for non-Gaussian spatial and spatio-temporal data"
 author: "John Tipton"
 date: "4/6/2021"
 output: 
@@ -34,6 +34,7 @@ library(tidyverse)
 library(knitr)
 library(pgR)
 library(mvnfast)
+library(knitcitations)
 ```
 
 ```{r, echo=FALSE, message=FALSE}
@@ -55,24 +56,24 @@ biblio <- bibtex::read.bib("pg.bib")
 
 ## Research Themes
 
-* Computational Bayesian methods
+* Computational Bayesian methods.
 
-* Spatio-temporal statistics
+* Spatio-temporal statistics.
 
-* Science-motivated statistical modeling
+* Science-motivated statistical modeling.
 
 ## Overview
 
-1) Spatio-temporal reconstruction of climate from pollen
-    a) Non-linear functional relationship
-        * Computationally challenging
-        * Non-linear and non-Gaussian relationships among data
+1) Spatio-temporal reconstruction of climate from pollen.
+    a) Non-linear functional relationship.
+        * Computationally challenging.
+        * Non-linear and non-Gaussian relationships among data.
     
-    b) Using data/parameter augmentation to improve computation
+    b) Using data/parameter augmentation to improve computation.
     
-2) Recursive Bayesian inference for latent spatial data
-    * Reducing computational cost through parallelization
-    * Better Markov Chain Monte Carlo (MCMC) mixing
+2) Recursive Bayesian inference for latent spatial data.
+    * Reducing computational cost through parallelization.
+    * Better Markov Chain Monte Carlo (MCMC) mixing.
 
 
 # Spatio-temporal reconstruction of climate from pollen
@@ -98,48 +99,6 @@ biblio <- bibtex::read.bib("pg.bib")
     - [NOAA Pollen Database](https://www.ncdc.noaa.gov/data-access/paleoclimatology-data/datasets/pollen).
 
 
-<!-- ## Some like it hot, some not -->
-
-<!-- ```{r, out.width = "100%", fig.align = 'center', cache = TRUE, message = FALSE} -->
-<!-- library(cowplot) -->
-<!-- p1 <- ggdraw() + draw_image(magick::image_read_pdf("psemen.pdf"), scale = 0.9) -->
-<!-- p2 <- ggdraw() + draw_image(magick::image_read_pdf("quefal.pdf"), scale = 0.9) -->
-
-<!-- plot_grid(p1, p2) -->
-<!-- # knitr::include_graphics(c("psemen.pdf", "quefal.pdf")) -->
-<!-- ``` -->
-
-
-<!-- - <font size="3"> -->
-<!-- Source: [https://www.fs.fed.us/database/feis/pdfs/Little/aa_SupportingFiles/LittleMaps.html](https://www.fs.fed.us/database/feis/pdfs/Little/aa_SupportingFiles/LittleMaps.html) -->
-<!-- </font> -->
-
-
-
-## Most analysis are inherently non-spatial
-
-- Due to challenging data likelihood.
-
-<hr style="height:24px; visibility:hidden;" />
-
-- Extremely noisy relationship between data and process.
-
-    <hr style="height:12px; visibility:hidden;" />
-
-    - No obvious patterns when plotting the data.
-    
-    <hr style="height:12px; visibility:hidden;" />
-
-    - Inverse prediction problem.
-
-<hr style="height:24px; visibility:hidden;" />
-
-- Lack of good statistical software.    
-
-    <hr style="height:12px; visibility:hidden;" />
-    
-    - gitHub packages [pollenReconstruction](https://jtipton25.github.io/pollenReconstruction/), [pgR](https://jtipton25.github.io/pgR/), and [BayesMRA](https://jtipton25.github.io/BayesMRA/) in development. 
-    
 
 
 ## Modeling goal
@@ -154,10 +113,13 @@ biblio <- bibtex::read.bib("pg.bib")
 
 - Generate climate histories that are local to the site of interest with uncertainty.
 
-<hr style="height:180px; visibility:hidden;" />
+<hr style="height:160px; visibility:hidden;" />
 
 
-<div class="footer" style="font-size:80%;"> @tipton2019predicting </div>
+<font size="3">
+`r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`
+</font>
+
 
 ## Setting the stage 
 
@@ -174,25 +136,37 @@ biblio <- bibtex::read.bib("pg.bib")
 
 <hr style="height:24px; visibility:hidden;" />
 
-- Prior work -- 4 sites and total compute time of approximately 28 hours.
+## Setting the stage 
 
-    <hr style="height:12px; visibility:hidden;" />
+- Prior work -- **4 pollen cores** and total compute time of approximately 28 hours.
 
-    - Currently: 363 sites with 
-        - non-linear response: compute time $\approx$ 48 hours.
-        - P&oacute;lya-gamma linear response: compute time less than 2 hours.
+    <hr style="height:24px; visibility:hidden;" />
+
+- Currently: 363 sites:
+    - non-linear response: compute time $\approx$ 48 hours.
+    - P&oacute;lya-gamma linear response: compute time less than 2 hours.
 
 
-<hr style="height:24px; visibility:hidden;" />
+<hr style="height:150px; visibility:hidden;" />
 
-<div class="footer" style="font-size:80%;"> @holmstrom2015bayesian </div>
-
+<font size="3">
+`r paste0(capture.output(print(biblio["holmstrom2015bayesian"])), collapse = " ")`
+</font>
 
 ---
 
 ```{r, fig.align='center', out.width = '100%'}
 knitr::include_graphics("./images/pollen-alps-sites.png") 
 ```
+
+---
+
+```{r, fig.align='center', out.width = '100%'}
+# knitr::include_graphics("./images/pollen-sites.png") 
+knitr::include_graphics("./images/all-sites.png") 
+```
+
+# Non-linear response model
 
 ## Data model 
 
@@ -215,7 +189,6 @@ knitr::include_graphics("./images/pollen-alps-sites.png")
 
 - Compositional count data.
 
-# Non-linear response model
 ## Data Model
 
 For the $i$th observation at location $\mathbf{s}$ and time $t$, 
@@ -239,7 +212,7 @@ is a $d$-dimensional compositional count observation.
 ## Data Model
 $$
 \begin{align*}
-\mathbf{y}_i \left( \mathbf{s}, t \right) | \mathbf{p}\left( \mathbf{s}, t \right) & \sim \operatorname{Multinomial} \left( M_i \left( \mathbf{s}, t \right), \mathbf{p}\left( \mathbf{s}, t \right) \right)
+\mathbf{y}_i \left( \mathbf{s}, t \right) | \mathbf{p}\left( \mathbf{s}, t \right) & \sim \operatorname{Multinomial} \left( M_i \left( \mathbf{s}, t \right), \mathbf{p}\left( \mathbf{s}, t \right) \right).
 \end{align*}
 $$
 
@@ -249,15 +222,7 @@ $$
 
 <hr style="height:24px; visibility:hidden;" />
 
-* Compositional count data.
-
-    <hr style="height:12px; visibility:hidden;" />
-
-    * Total count is not informative of the absolute composition. 
-
-    <hr style="height:12px; visibility:hidden;" />
-
-    * Observation informative of the relative proportions $p_{j} \left( \mathbf{s}, t \right)$ only.
+* Observation informative of the relative proportions $p_{j} \left( \mathbf{s}, t \right)$ only.
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -274,7 +239,7 @@ $$
 
 $$
 \begin{align*}
-\mathbf{p}\left( \mathbf{s}, t \right) | \boldsymbol{\alpha}\left( \mathbf{s}, t \right) & \sim \operatorname{Dirichlet} \left( \boldsymbol{\alpha}\left( \mathbf{s}, t \right) \right)
+\mathbf{p}\left( \mathbf{s}, t \right) | \boldsymbol{\alpha}\left( \mathbf{s}, t \right) & \sim \operatorname{Dirichlet} \left( \boldsymbol{\alpha}\left( \mathbf{s}, t \right) \right).
 \end{align*}
 $$
 
@@ -286,7 +251,7 @@ $$
 
 $$
  \begin{align*}
-\mathbf{y}_i\left( \mathbf{s}, t \right) | \boldsymbol{\alpha}\left( \mathbf{s}, t \right) & \sim \operatorname{Dirichlet-Multinomial} \left( M_i\left( \mathbf{s}, t \right), \boldsymbol{\alpha}\left( \mathbf{s}, t \right) \right)
+\mathbf{y}_i\left( \mathbf{s}, t \right) | \boldsymbol{\alpha}\left( \mathbf{s}, t \right) & \sim \operatorname{Dirichlet-Multinomial} \left( M_i\left( \mathbf{s}, t \right), \boldsymbol{\alpha}\left( \mathbf{s}, t \right) \right).
 \end{align*}
 $$
 
@@ -300,7 +265,7 @@ $$
 
 $$
 \begin{align*}
-\operatorname{log} \left( \boldsymbol{\alpha} \left( \mathbf{s}, t \right) \right) & = \mathbf{z}\left( \mathbf{s}, t \right) \boldsymbol{\beta}.
+\operatorname{log} \left( \boldsymbol{\alpha} \left( \mathbf{s}, t \right) \right) & = f \left( \mathbf{z}\left( \mathbf{s}, t \right) \right) \boldsymbol{\beta}.
 \end{align*}
 $$
 
@@ -310,15 +275,17 @@ $$
 
 <hr style="height:24px; visibility:hidden;" />
 
+* $f(\cdot)$ is some function of the climate state.
+
+<hr style="height:24px; visibility:hidden;" />
+
 * $\boldsymbol{\beta}$ is a $q \times d$ dimensional matrix of regression coefficients.
     
-## Fitted Respone curves
-
-* Vegetation response to climate is non-linear.
+---
 
 <hr style="height:8px; visibility:hidden;" />
 
-```{r, out.width='75%', fig.align = 'center', echo=FALSE}
+```{r, out.width='100%', fig.align = 'center', echo=FALSE}
 knitr::include_graphics(here::here("images", "alps-functional-fit-all-models-subset.png")) 
 ```
 
@@ -326,25 +293,26 @@ knitr::include_graphics(here::here("images", "alps-functional-fit-all-models-sub
 
 $$
 \begin{align*}
-\operatorname{log} \left( \boldsymbol{\alpha} \left( \mathbf{s}, t \right) \right) & = \mathbf{B} \left( \mathbf{z}\left( \mathbf{s}, t \right) \right) \boldsymbol{\beta}
+\operatorname{log} \left( \boldsymbol{\alpha} \left( \mathbf{s}, t \right) \right) & = f \left( \mathbf{z}\left( \mathbf{s}, t \right) \right) \boldsymbol{\beta}.
 \end{align*}
 $$
 
 <hr style="height:8px; visibility:hidden;" />
 
-* $\mathbf{B} \left( \mathbf{z}\left( \mathbf{s}, t \right) \right)$ is a basis expansion of the covariates $\mathbf{z}\left( \mathbf{s}, t \right)$.
+* $f \left( \mathbf{z}\left( \mathbf{s}, t \right) \right)$ is a basis expansion of the covariates $\mathbf{z}\left( \mathbf{s}, t \right)$.
     * Use B-splines or Gaussian Processes as a basis.
     * $\mathbf{z}\left( \mathbf{s}, t \right)$ is unknown for $t \neq 1$.  
     * Computationally challenging.
 
-<hr style="height:8pxpx; visibility:hidden;" />
+<hr style="height:60px; visibility:hidden;" />
 
 <font size="3">
-`r capture.output(print(biblio["nolan2019comparing"]))`
+`r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`
 
 <!-- <hr style="height:1px; visibility:hidden;" /> -->
-`r capture.output(print(biblio["hefley2017basis"]))`
+`r paste0(capture.output(print(biblio["hefley2017basis"])), collapse = " ")`
 </font>
+
 
 
 ## Calibration
@@ -357,7 +325,7 @@ $$
 $$
 \begin{align*}
 \mathbf{y} \left(1\right) & = \left( \mathbf{y} \left( \mathbf{s}_1, 1 \right), \ldots, \mathbf{y} \left( \mathbf{s}_n, 1 \right) \right)' \\
-\mathbf{z} \left(1\right) & = \left( \mathbf{z} \left( \mathbf{s}_1, 1 \right), \ldots, \mathbf{z} \left( \mathbf{s}_n, 1 \right) \right)'
+\mathbf{z} \left(1\right) & = \left( \mathbf{z} \left( \mathbf{s}_1, 1 \right), \ldots, \mathbf{z} \left( \mathbf{s}_n, 1 \right) \right)'.
 \end{align*}
 $$
 
@@ -369,20 +337,6 @@ $$
 <br />
 
 
-## Process Model: Dynamic Model
-* Estimate the latent process $\mathbf{z} \left( \mathbf{s}, t \right)$.
-
-<br />
-
-* Options:
-    1) continuous vs. discrete space (geostatistical vs. CAR models).
-    2) continuous vs. discrete time (stochastic process vs. AR models).
-
-<br />
-
-* For now, we focus on continuous space and discrete time.
-
-
 ## Dynamic Model
 
 * For $\mathbf{z} \left(t \right) = \left( \mathbf{z} \left(\mathbf{s}_1, t \right)', \ldots,  \mathbf{z} \left(\mathbf{s}_n, t \right)' \right)$, we assume:
@@ -391,7 +345,7 @@ $$
 
 $$
 \begin{align*}
-\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \boldsymbol{\eta} \left(t \right)
+\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \boldsymbol{\eta} \left(t \right).
 \end{align*}
 $$
 
@@ -405,7 +359,7 @@ $$
 
 * $\mathbf{R} \left( \boldsymbol{\theta} \right)$ is a Mátern spatial covariance matrix with parameters $\boldsymbol{\theta}$.
 
-## Elevation covariates
+## Elevation 
 
 ```{r, out.width='95%', echo=FALSE}
 knitr::include_graphics(here::here("images", "alps-elevation.png"))
@@ -415,69 +369,70 @@ knitr::include_graphics(here::here("images", "alps-elevation.png"))
 
 * Define a set of spatial knot locations $\mathbf{s}^{\star} = \left\{ \mathbf{s}_1^{\star}, \ldots, \mathbf{s}_m^{\star} \right\}$.
 
-<hr style="height:7px; visibility:hidden;" />
+<hr style="height:6px; visibility:hidden;" />
 
 $$
-\boldsymbol{\eta}^{\star} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right) \right)
+\boldsymbol{\eta}^{\star} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right) \right).
 $$
 
-<hr style="height:7px; visibility:hidden;" />
+<hr style="height:6px; visibility:hidden;" />
 
 * $\mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)$ is the spatial covariance defined at the knot locations $\mathbf{s}^{\star}$.
 
-<hr style="height:7px; visibility:hidden;" />
+<hr style="height:6px; visibility:hidden;" />
 
 * Linear interpolator from observed locations $\mathbf{s}$ to knot locations $\mathbf{s}_j^{\star}$ is 
 $$
-\mathbf{r} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1}
+\mathbf{r} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1},
 $$
 where $\mathbf{r} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right) 
-=  \operatorname{Cov} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right)$
+=  \operatorname{Cov} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right)$.
 
 <!-- <hr style="height:24px; visibility:hidden;" /> -->
 
 <font size="3">
-`r capture.output(print(biblio["banerjee2008gaussian"]))`
+`r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")`
 </font>
 
 ## Predictive Process
 
 * $\boldsymbol{\eta} \left( t \right) \approx \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \tilde{\boldsymbol{\eta}} \left( t \right)$.
 
-* The predictive process can be shown to be the optimal predictor of the parent process $\boldsymbol{\eta} \left( t \right)$ of dimension $m$ 
+<hr style="height:6px; visibility:hidden;" />
 
-* The dynamic climate process becomes
+* The predictive process can be shown to be the optimal predictor of the parent process $\boldsymbol{\eta} \left( t \right)$ of dimension $m$. 
+
+<hr style="height:6px; visibility:hidden;" />
+
+* The dynamic climate process is approximated by
 
 $$
 \begin{align*}
-\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & \approx \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\tilde{\eta}} \left(t \right)
+\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\tilde{\eta}} \left(t \right).
 \end{align*}
 $$
 
 
 
-## Time Uncertainty
+<!-- ## Time Uncertainty -->
 
-* Each fossil pollen observation includes estimates of time uncertainty.
-    * The time of the observation is uncertain.
-    * Weight the likelihoods according to age-depth model.
-    * Posterior distribution of ages.
+<!-- * Each fossil pollen observation includes estimates of time uncertainty. -->
+<!--     * The time of the observation is uncertain. -->
+<!--     * Weight the likelihoods according to age-depth model. -->
+<!--     * Posterior distribution of ages. -->
 
-<br />
+<!-- <br /> -->
 
-* For each observation fossil pollen observation an age-depth model gives a posterior distribution over dates.
-    * Define $\omega \left(\mathbf{s}, t \right)$ as P(age $\in (t-1, t)$). 
-    * $[\mathbf{y} \left( \mathbf{s}, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right) ] = \prod_{t=1}^T [\mathbf{y} \left( \mathbf{s}, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right)]^{\omega_\left(\mathbf{s}, t \right)}$.
+<!-- * For each observation fossil pollen observation an age-depth model gives a posterior distribution over dates. -->
+<!--     * Define $\omega \left(\mathbf{s}, t \right)$ as P(age $\in (t-1, t)$).  -->
+<!--     * $[\mathbf{y} \left( \mathbf{s}, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right) ] = \prod_{t=1}^T [\mathbf{y} \left( \mathbf{s}, t \right) | \boldsymbol{\alpha} \left( \mathbf{s}, t \right)]^{\omega_\left(\mathbf{s}, t \right)}$. -->
 
 # Implementation
 
 ## gitHub package
 
-* Non-spatial code available as a [gitHub package](https://github.com/jtipton25/BayesComposition).
+* Non-spatial code available in the gitHub package [BayesComposition](https://github.com/jtipton25/BayesComposition).
 
-```{r, eval=FALSE, echo=TRUE}
-devtools::install_github("jtipton25/BayesComposition")
-```
 
 <br />
 
@@ -488,12 +443,10 @@ devtools::install_github("jtipton25/BayesComposition")
 
 <br />
 
-* Code in `C++` using `Rcpp` package for computation speed.
+* Leverages code in `C++` using `Rcpp` package for computation speed.
 
 
-## Computational Details | Sequential model fitting
-
-
+## Computational Details
 
 1) Fit the calibration model.
 
@@ -505,16 +458,16 @@ devtools::install_github("jtipton25/BayesComposition")
 
     * Goal: Use recursive Bayesian ideas from end of talk.
  
-<hr style="height:20px; visibility:hidden;" />
+
+4) Fully Bayesian joint estimation.
+
+<hr style="height:60px; visibility:hidden;" />
 
 <font size="3">
-`r capture.output(print(biblio["hooten2019prior"]))`
+`r paste0(capture.output(print(biblio["hooten2019prior"])), collapse = " ")`
 </font>
 
 
-## Computational Details | Joint Estimation
-
-* Single stage Bayesian model.
 
 ## Estimation of $\mathbf{z} \left(\mathbf{s}, t \right)$
 
@@ -554,7 +507,7 @@ devtools::install_github("jtipton25/BayesComposition")
 <hr style="height:12px; visibility:hidden;" />
 
 <font size="3">
-`r capture.output(print(biblio["murray2010elliptical"]))`
+`r paste0(capture.output(print(biblio["murray2010elliptical"])), collapse = " ")`
 </font>
 
 ## Estimation of $\mathbf{z} \left(\mathbf{s}, t \right)$
@@ -567,14 +520,14 @@ devtools::install_github("jtipton25/BayesComposition")
     
 * Proposed solution:
     * Predictive process representation.
-    * Reduced computation cost $O(d T \frac{m^3}{3})$
+    * Reduced computation cost $O(d T \frac{m^3}{3})$.
     
 <!-- ## Elliptical Slice Sampling for DLMs -->
 
 <hr style="height:12px; visibility:hidden;" />
 
 <font size="3">
-`r capture.output(print(biblio["tipton2019predicting"]))`
+`r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`
 </font>
 
 
@@ -720,12 +673,12 @@ knitr::include_graphics(here::here("images", "alps-spatially-averaged-prediction
 ## Data model
 
 $$\begin{align*}
-\mathbf{y}(\mathbf{s}, t) & \sim \oN{Multinomial}(M(\mathbf{s}, t), \pi_{SB}(\boldsymbol{\eta}(\mathbf{s}, t))) 
+\mathbf{y}(\mathbf{s}, t) & \sim \oN{Multinomial}(M(\mathbf{s}, t), \pi_{SB}(\boldsymbol{\eta}(\mathbf{s}, t))). 
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
 
-- $\mathbf{y}(\mathbf{s}, t)$ is a $J$ dimensional vector of counts at site $\bm{s} \in \mathcal{D}$ and time $t \in \{1, \ldots, n_t\}$
+- $\mathbf{y}(\mathbf{s}, t)$ is a $J$ dimensional vector of counts at site $\bm{s} \in \mathcal{D}$ and time $t \in \{1, \ldots, n_t\}$.
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -733,7 +686,7 @@ $$\begin{align*}
 
 <hr style="height:24px; visibility:hidden;" />
 
-- Link the underlying climate states to the probability of observing species $j$ through the latent variable $\eta_j(\bm{s}, t)$
+- Link the underlying climate states to the probability of observing species $j$ through the latent variable $\eta_j(\bm{s}, t)$.
     
 ## Data model
 
@@ -741,11 +694,11 @@ $$\begin{align*}
 
     <hr style="height:12px; visibility:hidden;" />
     
-    - The map $\pi_{SB}: \mathcal{R}^{J-1} \rightarrow \Delta^{J}$ transforms the $J-1$ dimensional vector $\boldsymbol{\eta}(\mathbf{s}, t)$ to the $J$ dimensional unit simpled $\mathcal{\Delta}^{J}$.
+    - The map $\pi_{SB}: \mathcal{R}^{J-1} \rightarrow \Delta^{J}$ transforms the $J-1$ dimensional vector $\boldsymbol{\eta}(\mathbf{s}, t)$ to the $J$ dimensional unit simplex $\mathcal{\Delta}^{J}$.
     
 <hr style="height:24px; visibility:hidden;" />
 
-- Other maps to the unit simplex could be used (i.e., multi-logit), but the stick-breaking map will be important later.
+- Other maps to the unit simplex could be used (i.e., multi-logit), but the stick-breaking map reduces computational cost.
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -755,7 +708,7 @@ $$\begin{align*}
 $$\begin{align*}
 [\bm{y} | M, \pi_{SB}(\boldsymbol{\eta})] & =\oN{Multinomial}(\bm{y} | M, \pi_{SB}(\boldsymbol{\eta})) \\
 & = \prod_{j=1}^{J-1} \oN{binomial}(y_j | M_j, \tilde{\pi}_j) \\
-& = \prod_{j=}^{J-1} {M_j \choose y_j} \frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} }
+& = \prod_{j=}^{J-1} {M_j \choose y_j} \frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} }.
 \end{align*}$$
 
 - $M_j = M - \sum_{k < j} M_k$.
@@ -766,26 +719,31 @@ $$\begin{align*}
 
 <hr style="height:8px; visibility:hidden;" />
 
-<div class="footer" style="font-size:80%;"> @polson2013bayesian, @linderman2015dependent </div>
 
 
 ## Data model (ignoring spatio-temporal indexing)
 
 $$\begin{align*}
-\frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} } & = 2^{-M_j} e^{\kappa(y_j) \eta_j} \int_0^\infty e^{- \omega_j \eta_j^2 / 2 } [\omega_j | M_j, 0] \,d \omega
+\frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} } & = 2^{-M_j} e^{\kappa(y_j) \eta_j} \int_0^\infty e^{- \omega_j \eta_j^2 / 2 } [\omega_j | M_j, 0] \,d \omega.
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
 
-- The integral identity is proportional to the product representation of the multinomial distribution
+- The integral identity is proportional to the product representation of the multinomial distribution.
 
 <hr style="height:24px; visibility:hidden;" />
 
-- The density $[\omega_j | M_j, 0]$ is a P&oacute;lya-gamma distribution $PG(b, c)$
+- The density $[\omega_j | M_j, 0]$ is a P&oacute;lya-gamma distribution.
 
-<hr style="height:96px; visibility:hidden;" />
+<hr style="height:24px; visibility:hidden;" />
 
-<div class="footer" style="font-size:80%;"> @polson2013bayesian, @linderman2015dependent </div>
+<font size="3">
+`r paste0(capture.output(print(biblio["polson2013bayesian"])), collapse = " ")`
+
+`r paste0(capture.output(print(biblio["linderman2015dependent"])), collapse = " ")`
+</font>
+
+
 
 ## Data model (ignoring spatio-temporal indexing)
 
@@ -795,25 +753,23 @@ $$\begin{align*}
 
 $$\begin{align*}
 [\eta_j, y_j] & =  [\eta_j] {M_j \choose y_j} \frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} }\\
-& = \int_0^\infty   [\eta_j] {M_j \choose y_j} 2^{-M_j} e^{\kappa(y_j) \eta_j} e^{- \omega_j \eta_j^2 / 2 } [\omega_j | M_j, 0] \,d \omega
+& = \int_0^\infty   [\eta_j] {M_j \choose y_j} 2^{-M_j} e^{\kappa(y_j) \eta_j} e^{- \omega_j \eta_j^2 / 2 } [\omega_j | M_j, 0] \,d \omega,
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
 
 where the integral defines a joint density over $[\eta_j, y_j, \omega_j]$.
 
-<hr style="height:24px; visibility:hidden;" />
 
-<div class="footer" style="font-size:80%;"> @polson2013bayesian, @linderman2015dependent </div>
 ## Data model
 
 - Using this integral representation, we have
 
     $$\begin{align*}
-    \omega_j | \eta_j, y_j & \sim \oN{PG( M_j, \eta_j)}
+    \omega_j | \eta_j, y_j & \sim \oN{PG( M_j, \eta_j)},
     \end{align*}$$
     
-    which can be sampled using the exponential tilting property of the P&oacute;lya-gamma distribution 
+    which can be sampled using the exponential tilting property of the P&oacute;lya-gamma distribution. 
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -851,7 +807,7 @@ where the integral defines a joint density over $[\eta_j, y_j, \omega_j]$.
  
 
 $$\begin{align*}
-\eta_j(\bm{s}, t) = \color{blue}{\beta_{0j}} + \color{blue}{\beta_{1j}} \left( \bm{x}'(\bm{s}, t) \bs{\gamma} + \bm{w}'(\bm{s}) \bs{\alpha}(t) \right) + \color{blue}{\varepsilon(\bm{s}, t)}
+\eta_j(\bm{s}, t) = \color{blue}{\beta_{0j}} + \color{blue}{\beta_{1j}} \left( \bm{x}'(\bm{s}, t) \bs{\gamma} + \bm{w}'(\bm{s}) \bs{\alpha}(t) \right) + \color{blue}{\varepsilon(\bm{s}, t)}.
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
@@ -863,7 +819,6 @@ $$\begin{align*}
 - $\color{blue}{\varepsilon(\bm{s}, t)} \stackrel{iid}{\sim} \oN{N}(0, \sigma^2_j)$ models overdispersion relative to the linear regression response.
 
 
-
 ---
 
 ```{r, fig.align='center', out.width = '100%'}
@@ -873,7 +828,7 @@ knitr::include_graphics("./images/response-curves-fixed-mu.png")
 ## Process model -- climate process 
 
 $$\begin{align*}
-\eta_j(\bm{s}, t) = \beta_{0j} + \beta_{1j} \left( \color{red}{\bm{x}'(\bm{s}, t) \bs{\gamma}} + \color{purple}{\bm{w}'(\bm{s}) \bs{\alpha}(t)} \right) + \varepsilon(\bm{s}, t)
+\eta_j(\bm{s}, t) = \beta_{0j} + \beta_{1j} \left( \color{red}{\bm{x}'(\bm{s}, t) \bs{\gamma}} + \color{purple}{\bm{w}'(\bm{s}) \bs{\alpha}(t)} \right) + \varepsilon(\bm{s}, t).
 \end{align*}$$
 
 $\color{red}{\bm{X}(t) = \begin{pmatrix} \bm{x}'(\bm{s}_1, t) \\ \vdots \\ \bm{x}'(\bm{s}_n, t) \end{pmatrix}}$ are fixed covariates (elevation, latitude, etc.).
@@ -892,21 +847,21 @@ knitr::include_graphics("./images/estimated-fixed-effects-fixed-mu.png")
 
 ## Process model -- $\color{purple}{\mbox{random effects}}$  
 
-- Challenge: scaling to 1000s of sites and 15,000 years ($\approx 60$ time increments)
+- Challenge: scaling to 1000s of sites and 15,000 years ($\approx 60$ time increments).
 
 <hr style="height:24px; visibility:hidden;" />
 
-- Sparse, multiresolution representation with a dynamic linear model
+- Sparse, multiresolution representation with a dynamic linear model.
 
 <hr style="height:24px; visibility:hidden;" />
 
 $$\begin{align*}
-\color{purple}{\bm{w}'(\bm{s}) \bs{\alpha}(t)} = \color{purple}{\sum_{m=1}^M \bm{w}_m'(\bm{s}) \bs{\alpha}_m(t)}
+\color{purple}{\bm{w}'(\bm{s}) \bs{\alpha}(t)} = \color{purple}{\sum_{m=1}^M \bm{w}_m'(\bm{s}) \bs{\alpha}_m(t)}.
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
 
-- $\color{purple}{\bm{w}_m'(\bm{s})}$ is a Wendland basis over resolution $m$
+- $\color{purple}{\bm{w}_m'(\bm{s})}$ is a Wendland basis over resolution $m$.
 
 ## Process model -- $\color{purple}{\mbox{random effects}}$  
 
@@ -916,28 +871,31 @@ $$\begin{align*}
 knitr::include_graphics(c("./images/MRA-grid.png", "./images/MRA-alpha-fixed-mu.png"))
 ```
  
-<hr style="height:80px; visibility:hidden;" />
+<hr style="height:60px; visibility:hidden;" />
 
-<div class="footer" style="font-size:80%;"> @nychka2015multiresolution </div> 
+
+<font size="3">
+`r paste0(capture.output(print(biblio["nychka2015multiresolution"])), collapse = " ")`
+</font>
 
 ## Process model -- $\color{purple}{\mbox{random effects}}$  
 
 
 $$\begin{align*}
-\color{purple}{\bs{\alpha}_m(t)} & \sim \oN{N} \left( \bm{A}_m \color{purple}{\bs{\alpha}_m(t-1)}, \tau^2 \bm{Q}_m^{-1} \right)
+\color{purple}{\bs{\alpha}_m(t)} & \sim \oN{N} \left( \bm{A}_m \color{purple}{\bs{\alpha}_m(t-1)}, \tau^2 \bm{Q}_m^{-1} \right).
 \end{align*}$$
 
 <hr style="height:24px; visibility:hidden;" />
 
-- Assume the constraint $\color{purple}{(\mathbf{W}_m \bs{\alpha}_m(t))'} \bm{1} = 0$ for all $m$ and $t$
+- Assume the constraint $\color{purple}{(\mathbf{W}_m \bs{\alpha}_m(t))'} \bm{1} = 0$ for all $m$ and $t$.
 
 <hr style="height:24px; visibility:hidden;" />
 
-- $\bm{A}_m$ is the evolution matrix (assume $\bm{A}_m \equiv \rho \bm{I}$ for all $m$)
+- $\bm{A}_m$ is the evolution matrix (assume $\bm{A}_m \equiv \rho \bm{I}$ for all $m$).
 
 <hr style="height:24px; visibility:hidden;" />
 
-- $\bm{Q}_m$ is the precision matrix constructed from either a CAR or SAR process over the $m$th resolution
+- $\bm{Q}_m$ is the precision matrix constructed from either a CAR or SAR process over the $m$th resolution.
 
 
 ---
@@ -970,11 +928,6 @@ knitr::include_graphics("./images/spatial-averaged-fixed-mu.png")
 knitr::include_graphics("./images/spatial-averaged-predictions-fixed-mu.png") 
 ```
 
-## Next steps
-
-```{r, fig.align='center', out.width = '100%'}
-knitr::include_graphics("./images/pollen-sites.png") 
-```
 
 
 
@@ -986,7 +939,7 @@ knitr::include_graphics("./images/pollen-sites.png")
 
 $$
 \begin{align*}
-\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{Z} \boldsymbol{\alpha} + \boldsymbol{\varepsilon}
+\mathbf{y} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{Z} \boldsymbol{\alpha} + \boldsymbol{\varepsilon}.
 \end{align*}
 $$
 
@@ -1006,28 +959,28 @@ $$
 
 <hr style="height:8px; visibility:hidden;" />
 
-* $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$
+* $\boldsymbol{\varepsilon} \sim \operatorname{N}(\mathbf{0}, \sigma^2 \mathbf{I})$.
 
 
 ## First order vs. second order representation
 
-* First-order (mean) representation
+* First-order (mean) representation:
 
 $$
 \begin{align*}
-\mathbf{y} & \sim \operatorname{N} \left(\mathbf{X} \boldsymbol{\beta} + \mathbf{Z} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right) \\
-\boldsymbol{\alpha} & \sim \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\alpha} \right) \\
-\boldsymbol{\beta} & \sim \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\beta} \right) 
+\mathbf{y} & \sim \operatorname{N} \left(\mathbf{X} \boldsymbol{\beta} + \mathbf{Z} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right), \\
+\boldsymbol{\alpha} & \sim \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\alpha} \right), \\
+\boldsymbol{\beta} & \sim \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\beta} \right).
 \end{align*}
 $$
 
-* Second order (covariance) representation
+* Second order (covariance) representation:
 
 $$
 \begin{align*}
 \mathbf{y} & \sim \int \int \operatorname{N} \left(\mathbf{X} \boldsymbol{\beta} + \mathbf{Z} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right) \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\alpha} \right) \operatorname{N} \left( \mathbf{0}, \boldsymbol{\Sigma}_{\beta} \right)  \, \mathrm{d} \boldsymbol{\alpha} \, \mathrm{d} \boldsymbol{\beta} \\ 
 & \sim \operatorname{N} \left(\mathbf{0}, \sigma^2 \mathbf{I} +
-\mathbf{Z} \boldsymbol{\Sigma}_{\alpha}\mathbf{Z'} + \mathbf{X} \boldsymbol{\Sigma}_\beta \mathbf{X}' \right) 
+\mathbf{Z} \boldsymbol{\Sigma}_{\alpha}\mathbf{Z'} + \mathbf{X} \boldsymbol{\Sigma}_\beta \mathbf{X}' \right).
 \end{align*}
 $$
 
@@ -1045,7 +998,7 @@ $$
 
     * Replace the non-Gaussian likelihood by an approximating distribution that is Gaussian -- Variational Inference.
 
-    * Congujate recursive Bayesian inference.
+    * Conjugate recursive Bayesian inference.
  
  
 <!-- ## Example: Linear Regression -->
@@ -1522,8 +1475,8 @@ $$
 
 $$
 \begin{align*}
-y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right) \\
-\boldsymbol{\eta} & \sim \operatorname{N} \left( \mathbf{0}, \mathbf{C} \right)
+y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right), \\
+\boldsymbol{\eta} & \sim \operatorname{N} \left( \mathbf{0}, \mathbf{C} \right).
 \end{align*}
 $$
 
@@ -1568,7 +1521,7 @@ $$
 \begin{align*}
 \mathbf{y} & = \int \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta} + \mathbf{U} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right) \operatorname{N} \left( \mathbf{0}, \boldsymbol{D} \right) \, \mathrm{d} \boldsymbol{\alpha}  \\
 & = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{U} \mathbf{D} \mathbf{U}' \right) \\
-& = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{C} \right) \\
+& = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{C} \right).
 \end{align*}
 $$
 
@@ -1662,8 +1615,7 @@ $$
 
 * How can we perform integrated Bayesian inference to get the computational advantages of the second-order representation in non-Gaussian models?
 
-## Idea
-### Classical model 
+## Independent data
 
 * Single stage (joint) model posterior
 
@@ -1681,7 +1633,7 @@ $$
 
 * $\mathbf{z}$ is a spatial random process .
 
-    * $\mathbf{z} \sim \operatorname{N} (\mathbf{0}, \boldsymbol{C})$
+    * $\mathbf{z} \sim \operatorname{N} (\mathbf{0}, \boldsymbol{C})$.
 
 * Must sample the process model (random effect $\mathbf{z}$) directly -- cannot integrate out the process variable.
 
@@ -1725,7 +1677,7 @@ $$
 * Generate $k_1 = 1, \ldots, K_1$ first stage samples $\tilde{z}_i^{(k_1)}$.
 
 
-## Second stage estimation | [Metropolis-Hastings](https://chi-feng.github.io/mcmc-demo/app.html)
+## Second stage estimation--[Metropolis-Hastings](https://chi-feng.github.io/mcmc-demo/app.html)
 
 1) Current state of variable $z$ at the $k$th MCMC iteration is $z^{(k)}$.
 
@@ -1737,7 +1689,7 @@ $$
 
 $$
 \begin{align*}
-z^{(k)} = \begin{cases} z^{\star} & \mbox{ with probability } \min(1, a^{\star}) \\ 
+z^{(k)} = \begin{cases} z^{\star} & \mbox{ with probability } \min(1, a^{\star}), \\ 
 z^{(k-1)} & \mbox{otherwise}. \end{cases}
 \end{align*}
 $$
@@ -1834,7 +1786,7 @@ $$
 
 $$
 \begin{align*}
-y \left( \mathbf{s}_i \right) & = g^{-1} \left( z \left( \mathbf{s}_i \right) \right) \\
+y \left( \mathbf{s}_i \right) & = g^{-1} \left( z \left( \mathbf{s}_i \right) \right), \\
 z \left( \mathbf{s}_i \right) & = \mathbf{X} \left( \mathbf{s}_i \right) \boldsymbol{\beta} + \eta \left( \mathbf{s}_i \right).
 \end{align*}
 $$
@@ -1876,7 +1828,7 @@ where the latent intensity $\boldsymbol{\lambda} = \left( \lambda \left( \mathbf
 
 $$
 \begin{align*}
-\log(\boldsymbol{\lambda}) & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta} \\
+\log(\boldsymbol{\lambda}) & = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\eta}, \\
 \boldsymbol{\eta} | \tau^2, \boldsymbol{\theta} & \sim \operatorname{N} \left( \mathbf{0}, \tau^2 \mathbf{R} \left( \boldsymbol{\theta} \right) \right),
 \end{align*}
 $$
@@ -1884,17 +1836,6 @@ where $\tau^2$ is a variance parameter and $\boldsymbol{\theta}$ is a set of par
 
 * Note: $\boldsymbol{\eta}$ is a latent random vector of dimension $n$ which cannot be analytically integrated out of the model.
 
-## Bayesian spatial Poisson regression
-
-A common choice of $\mathbf{R} \left( \boldsymbol{\theta} \right)$ is the Matérn correlation function given by 
-
-$$
-\begin{align*}
-R( \mathbf{s}_i, \mathbf{s}_j | \boldsymbol{\theta} ) & = \tau^2 \frac {2^{1-\nu }}{\Gamma (\nu )} \left( {\sqrt {2\nu }} \frac{\|\mathbf{s}_i - \mathbf{s}_j \|}{\phi} \right)^{\nu }K_{\nu } \left( {\sqrt {2\nu }} \frac{\|\mathbf{s}_i - \mathbf{s}_j \|}{\phi} \right).
-\end{align*}
-$$
-
-* $\boldsymbol{\theta} = \left( \nu, \phi \right)'$ where $\nu$ controls the smoothness of the process and $\phi$ controls the spatial range of the correlation.
 
 ## Spatial Poisson Regression - First stage
 
@@ -1928,7 +1869,7 @@ $$
 $$
 \begin{align}
 \label{eq:MH-poisson}
-a_i^{\star} & = \frac{[y(\mathbf{s}_i) | \lambda^{\star}(\mathbf{s}_i)] [\lambda^{\star} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\beta}^{(k_2-1)}] [\lambda^{(k_2-1)}(\mathbf{s}_i) | y_i] }{[y(\mathbf{s}_i) | \lambda^{(k_2-1)}(\mathbf{s}_i)] [\lambda^{\star} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\theta}^{(k_2-1)}]  [\lambda^{\star}(\mathbf{s}_i) | y(\mathbf{s}_i)] } \\
+a_i^{\star} & = \frac{[y(\mathbf{s}_i) | \lambda^{\star}(\mathbf{s}_i)] [\lambda^{\star} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\beta}^{(k_2-1)}] [\lambda^{(k_2-1)}(\mathbf{s}_i) | y_i] }{[y(\mathbf{s}_i) | \lambda^{(k_2-1)}(\mathbf{s}_i)] [\lambda^{\star} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\theta}^{(k_2-1)}]  [\lambda^{\star}(\mathbf{s}_i) | y(\mathbf{s}_i)] }, \\
 \nonumber
 & = \frac{ \left[\lambda^{\star} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\beta}^{(k_2-1)} \right] \left[ \tilde{\lambda}^{(k_2-1)} \left( \mathbf{s}_i \right) \right] }{\left[\lambda^{(k_2-1)} ( \mathbf{s}_i) | \lambda(\mathbf{s}_{-i}), \boldsymbol{\eta}^{(k_2-1)}, \boldsymbol{\beta}^{(k_2-1)} \right] \left[ \tilde{\lambda}^{\star} \left( \mathbf{s}_i \right) \right]}.
 \end{align}
@@ -1959,7 +1900,7 @@ where $\boldsymbol{\lambda}(\mathbf{s}_{-i})$ is the vector of all of the $\lamb
 
 $$
 \begin{align*}
-\bar{\mu}_i & = \mathbf{X}_i \boldsymbol{\beta} + \boldsymbol{\Sigma}_{i, -i}  \boldsymbol{\Sigma}^{-1}_{-i, -i} \left( \log \left( \boldsymbol{\lambda} (\mathbf{s}_{-i}) \right) - \mathbf{X}_i \beta \right) \mbox{ and} \\ 
+\bar{\mu}_i & = \mathbf{X}_i \boldsymbol{\beta} + \boldsymbol{\Sigma}_{i, -i}  \boldsymbol{\Sigma}^{-1}_{-i, -i} \left( \log \left( \boldsymbol{\lambda} (\mathbf{s}_{-i}) \right) - \mathbf{X}_i \beta \right), \\
 \bar{\sigma}^2_i & = \boldsymbol{\Sigma}_{i, i} - \boldsymbol{\Sigma}_{i, -i} \boldsymbol{\Sigma}^{-1}_{-i, -i} \boldsymbol{\Sigma}_{-i, i},
 \end{align*}
 $$
@@ -1967,20 +1908,21 @@ $$
 with $\boldsymbol{\Sigma}_{i, i} = \operatorname{Cov} \left( \log \left( \lambda(\mathbf{s}_i) \right), \log \left( \lambda(\mathbf{s}_i) \right) \right)$ and $\boldsymbol{\Sigma}_{i, -i} = \operatorname{Cov} \left( \log \left( \lambda(\mathbf{s}_i) \right), \log \left( \boldsymbol{\lambda}(\mathbf{s}_{-i}) \right) \right)$.
 
 
-## Spatial Poisson Regression - Simulation study
+## Spatial Simulation study
 
-* Two sample sizes for proof of concept.
+* Spatial Poisson and logistic regression.
 
-* Full rank spatial process of 150 (small) and 300 (medium) samples.
+* Full rank spatial process of 50, 100, 200, 300, 400, 500, 750, and 1000 samples.
 
-    * Note: typically full-rank spatial models are computationally intractable at about 1000 samples.
+    * Note: typically full-rank spatial models are computationally intractable near about 5000-10000 samples.
     
     * Computational complexity scales with $O(n^3)$ and memory scales as $O(n^2)$.
     
-    * For real-world problems, use reduced rank ideas like those presented earlier to scale to massive datasets.
+* For real-world problems, use reduced rank ideas like those presented earlier to scale to massive datasets.
     
-## Simulation study - Runtime
-
+    
+## Simulation study 
+ 
 ```{r, fig.show = "hold", out.width='50%', fig.align = "default"}
 knitr::include_graphics(
   c(
@@ -2006,7 +1948,7 @@ knitr::include_graphics(
 )
 ```
 
-## Simulation study - $\boldsymbol{\beta}$ estimates
+## Simulation study: $\boldsymbol{\beta}$ estimates
 
 ```{r, out.width='50%'}
 knitr::include_graphics(
@@ -2020,55 +1962,41 @@ knitr::include_graphics(
 ```
 
 
-## Future work
-
-* Hybrid sampler between MH random sample and IS.
-    * Similar to [Firefly MCMC](https://arxiv.org/abs/1403.5693).
-    
-<hr style="height:8px; visibility:hidden;" />
-
-* Density smooth on first stage samples.
-    * Allow for a tuneable random walk rather than independent first stage samples.
-
-<hr style="height:8px; visibility:hidden;" />
-
-* Define transient first stage prior using data.
-    * Seems like it would violate rules for specifying the prior.
-    * Because transient prior is canceled out in second stage, this issue is irrelevant.
-
 ## Thanks for your attention
 
 
 <center>
-<p style="font-size:200%;">
+<p style="font-size:150%;">
 [www.johnrtipton.com](http://www.johnrtipton.com) 
 </p>
 </center>
 
 
-## R packages
+- R packages:
 
-- Coming soon:
+    - [BayesComposition](https://github.com/jtipton25/BayesComposition) -- Non-spatial Dirichlet-multinomial climate reconcstruction.
 
-    <hr style="height:12px; visibility:hidden;" />
-    
     - [BayesMRA](https://jtipton25.github.io/BayesMRA/) -- Bayesian spatial and spatio-temporal MRA models (inspired by LatticeKrig).
-    
-    <hr style="height:12px; visibility:hidden;" />
     
     - [pgR](https://jtipton25.github.io/pgR/) -- P&oacute;lya-gamma multinomial regression models.
     
-    <hr style="height:12px; visibility:hidden;" />
-    
-    - [pollenReconstruction](https://jtipton25.github.io/pollenReconstruction/) - reconstruction of temperature from pollen.
+    - [pollenReconstruction](https://jtipton25.github.io/pollenReconstruction/) - Spatio-temporal climate reconstruction from compositional count data.
 
-<hr style="height:24px; visibility:hidden;" />
 
-- Talk available at [www.jtipton25.github.io/Los-alamos-2021](www.jtipton25.github.io/Los-alamos-2021).
+- Talk available at [www.jtipton25.github.io/Los-Alamos-2021](https://jtipton25.github.io/Los-Alamos-2021).
 
-<hr style="height:24px; visibility:hidden;" />
-
-- Website: [www.johnrtipton.com](https://sites.google.com/site/johntiptonswebsite).
 
 ## References {.smaller}
  
+- <font size="2"> `r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["murray2010elliptical"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["polson2013bayesian"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["holmstrom2015bayesian"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["linderman2015dependent"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["nychka2015multiresolution"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["hefley2017basis"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["hooten2019prior"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["nolan2019comparing"])), collapse = " ")` </font>
+- <font size="2"> `r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`</font>
+
+
