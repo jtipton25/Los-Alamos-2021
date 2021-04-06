@@ -203,7 +203,7 @@ $$
 
 <hr style="height:122x; visibility:hidden;" />
 
-is a $d$-dimensional compositional count observation.
+is a $J$-dimensional compositional count observation.
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -218,7 +218,7 @@ $$
 
 <hr style="height:24px; visibility:hidden;" />
 
-* $M_i \left( \mathbf{s}, t \right) = \sum_{j=1}^d y_{ij}\left( \mathbf{s}, t \right)$ is the total count observed (fixed and known) for observation $i$ at location $\mathbf{s}$ and time $t$.
+* $M_i \left( \mathbf{s}, t \right) = \sum_{j=1}^J y_{ij}\left( \mathbf{s}, t \right)$ is the total count observed (fixed and known) for observation $i$ at location $\mathbf{s}$ and time $t$.
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -279,7 +279,7 @@ $$
 
 <hr style="height:24px; visibility:hidden;" />
 
-* $\boldsymbol{\beta}$ is a $q \times d$ dimensional matrix of regression coefficients.
+* $\boldsymbol{\beta}$ is a $q \times J$ dimensional matrix of regression coefficients.
     
 ---
 
@@ -369,17 +369,22 @@ knitr::include_graphics(here::here("images", "alps-elevation.png"))
 
 * Define a set of spatial knot locations $\mathbf{s}^{\star} = \left\{ \mathbf{s}_1^{\star}, \ldots, \mathbf{s}_m^{\star} \right\}$.
 
-<hr style="height:6px; visibility:hidden;" />
-
 $$
 \boldsymbol{\eta}^{\star} \left( t \right) \sim \operatorname{N} \left( \mathbf{0}, \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right) \right).
 $$
 
-<hr style="height:6px; visibility:hidden;" />
 
 * $\mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)$ is the spatial covariance defined at the knot locations $\mathbf{s}^{\star}$.
 
-<hr style="height:6px; visibility:hidden;" />
+
+
+<hr style="height:200px; visibility:hidden;" />
+
+<font size="3">
+`r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")`
+</font>
+
+## Predictive Process
 
 * Linear interpolator from observed locations $\mathbf{s}$ to knot locations $\mathbf{s}_j^{\star}$ is 
 $$
@@ -388,19 +393,7 @@ $$
 where $\mathbf{r} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right) 
 =  \operatorname{Cov} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right)$.
 
-<!-- <hr style="height:24px; visibility:hidden;" /> -->
-
-<font size="3">
-`r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")`
-</font>
-
-## Predictive Process
-
-* $\boldsymbol{\eta} \left( t \right) \approx \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \tilde{\boldsymbol{\eta}} \left( t \right)$.
-
-<hr style="height:6px; visibility:hidden;" />
-
-* The predictive process can be shown to be the optimal predictor of the parent process $\boldsymbol{\eta} \left( t \right)$ of dimension $m$. 
+* $\boldsymbol{\eta} \left( t \right) \approx \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\eta}^{\star} \left( t \right)$.
 
 <hr style="height:6px; visibility:hidden;" />
 
@@ -408,7 +401,7 @@ where $\mathbf{r} \left(\mathbf{s}, \mathbf{s}_j^{\star} \right)
 
 $$
 \begin{align*}
-\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\tilde{\eta}} \left(t \right).
+\mathbf{z} \left(t \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} & = \mathbf{M}\left(t\right) \left( \mathbf{z} \left(t-1 \right) - \mathbf{X} \left( t \right) \boldsymbol{\gamma} \right) + \mathbf{r} \left(\mathbf{s}, \mathbf{s}^{\star} \right) \mathbf{R}^{\star}\left( \boldsymbol{\theta} \right)^{-1} \boldsymbol{\eta}^{\star} \left(t \right).
 \end{align*}
 $$
 
@@ -491,7 +484,6 @@ $$
 
 * Elliptical Slice Sampling.
     * Assumes a Gaussian prior.
-    * Difficult to implement in a DLM framework.
     * Requires no tuning.
     * Efficiently samples in high dimensions.
     * Easily explores multiple modes.
@@ -682,10 +674,6 @@ $$\begin{align*}
 
 <hr style="height:24px; visibility:hidden;" />
 
-- $M(\mathbf{s}, t) = \sum_{j=1}^J \mathbf{y}_j(\mathbf{s}, t)$ is the total count observed.
-
-<hr style="height:24px; visibility:hidden;" />
-
 - Link the underlying climate states to the probability of observing species $j$ through the latent variable $\eta_j(\bm{s}, t)$.
     
 ## Data model
@@ -752,7 +740,7 @@ $$\begin{align*}
 <hr style="height:24px; visibility:hidden;" />
 
 $$\begin{align*}
-[\eta_j, y_j] & =  [\eta_j] {M_j \choose y_j} \frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} }\\
+[y_j, \eta_j] & =  [\eta_j] {M_j \choose y_j} \frac{(e^{\eta_j})^{y_j}}{(1 + e^{\eta_j})^{M_j} }\\
 & = \int_0^\infty   [\eta_j] {M_j \choose y_j} 2^{-M_j} e^{\kappa(y_j) \eta_j} e^{- \omega_j \eta_j^2 / 2 } [\omega_j | M_j, 0] \,d \omega,
 \end{align*}$$
 
@@ -887,11 +875,7 @@ $$\begin{align*}
 
 <hr style="height:24px; visibility:hidden;" />
 
-- Assume the constraint $\color{purple}{(\mathbf{W}_m \bs{\alpha}_m(t))'} \bm{1} = 0$ for all $m$ and $t$.
-
-<hr style="height:24px; visibility:hidden;" />
-
-- $\bm{A}_m$ is the evolution matrix (assume $\bm{A}_m \equiv \rho \bm{I}$ for all $m$).
+- $\bm{A}_m$ is the propagator matrix (assume $\bm{A}_m \equiv \rho \bm{I}$ for all $m$).
 
 <hr style="height:24px; visibility:hidden;" />
 
@@ -1471,59 +1455,59 @@ $$
 
 
 
-## Example: spatial regression model
+<!-- ## Example: spatial regression model -->
 
-$$
-\begin{align*}
-y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right), \\
-\boldsymbol{\eta} & \sim \operatorname{N} \left( \mathbf{0}, \mathbf{C} \right).
-\end{align*}
-$$
+<!-- $$ -->
+<!-- \begin{align*} -->
+<!-- y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right), \\ -->
+<!-- \boldsymbol{\eta} & \sim \operatorname{N} \left( \mathbf{0}, \mathbf{C} \right). -->
+<!-- \end{align*} -->
+<!-- $$ -->
 
-* $\boldsymbol{\eta} = \left( \eta \left( \mathbf{s}_1 \right), \ldots, \eta \left( \mathbf{s}_n \right) \right)'$.
+<!-- * $\boldsymbol{\eta} = \left( \eta \left( \mathbf{s}_1 \right), \ldots, \eta \left( \mathbf{s}_n \right) \right)'$. -->
 
-<hr style="height:8px; visibility:hidden;" />
+<!-- <hr style="height:8px; visibility:hidden;" /> -->
 
-* Spatial location index $\mathbf{s}$.
+<!-- * Spatial location index $\mathbf{s}$. -->
 
-<hr style="height:8px; visibility:hidden;" />
+<!-- <hr style="height:8px; visibility:hidden;" /> -->
 
-* $\mathbf{C}\left( \cdot, \cdot \right)$ is a [spatial covariance function](https://en.wikipedia.org/wiki/Covariance_function). 
+<!-- * $\mathbf{C}\left( \cdot, \cdot \right)$ is a [spatial covariance function](https://en.wikipedia.org/wiki/Covariance_function).  -->
 
-<hr style="height:8px; visibility:hidden;" />
+<!-- <hr style="height:8px; visibility:hidden;" /> -->
 
-* $\mathbf{C}$ is a spatial covariance matrix with $ij$th entry $\mathbf{C}_{ij} = \mathbf{C}\left( \mathbf{s}_i, \mathbf{s}_j \right)$.
+<!-- * $\mathbf{C}$ is a spatial covariance matrix with $ij$th entry $\mathbf{C}_{ij} = \mathbf{C}\left( \mathbf{s}_i, \mathbf{s}_j \right)$. -->
 
-<hr style="height:8px; visibility:hidden;" />
+<!-- <hr style="height:8px; visibility:hidden;" /> -->
 
-* Observations nearby are more correlated than observations further away -- [Toblers first law of geography](https://en.wikipedia.org/wiki/Tobler%27s_first_law_of_geography).
+<!-- * Observations nearby are more correlated than observations further away -- [Toblers first law of geography](https://en.wikipedia.org/wiki/Tobler%27s_first_law_of_geography). -->
 
-## Example: spatial regression model
+<!-- ## Example: spatial regression model -->
 
-* Let $\mathbf{Z}$ be a set of spatial basis functions where $\mathbf{Z} \mathbf{Z}' = \mathbf{C}$.
+<!-- * Let $\mathbf{Z}$ be a set of spatial basis functions where $\mathbf{Z} \mathbf{Z}' = \mathbf{C}$. -->
 
-$$
-\begin{align*}
-y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right) \\
-& = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \mathbf{Z} \left( \mathbf{s} \right) \boldsymbol{\alpha} + \varepsilon \left( \mathbf{s} \right).
-\end{align*}
-$$
+<!-- $$ -->
+<!-- \begin{align*} -->
+<!-- y \left( \mathbf{s} \right) & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \eta \left( \mathbf{s} \right) + \varepsilon \left( \mathbf{s} \right) \\ -->
+<!-- & = \mathbf{X} \left( \mathbf{s} \right) \boldsymbol{\beta} + \mathbf{Z} \left( \mathbf{s} \right) \boldsymbol{\alpha} + \varepsilon \left( \mathbf{s} \right). -->
+<!-- \end{align*} -->
+<!-- $$ -->
 
-<hr style="height:8px; visibility:hidden;" />
+<!-- <hr style="height:8px; visibility:hidden;" /> -->
 
-* $\mathbf{Z}$ can be chosen to provide fast computation, reduced-rank computation, or other properties of interest if you use the approximation $\mathbf{Z} \boldsymbol{\Sigma}_{\alpha} \mathbf{Z}' \approx \mathbf{C}$.
+<!-- * $\mathbf{Z}$ can be chosen to provide fast computation, reduced-rank computation, or other properties of interest if you use the approximation $\mathbf{Z} \boldsymbol{\Sigma}_{\alpha} \mathbf{Z}' \approx \mathbf{C}$. -->
 
-## Example: spatial regression model
+<!-- ## Example: spatial regression model -->
 
-* Let $\mathbf{C} = \mathbf{U} \mathbf{D} \mathbf{U}'$ be an eigen-decomposition. Then setting $\mathbf{Z}= \mathbf{U}$ and $\boldsymbol{\alpha} \sim \operatorname{N} \left( \mathbf{0}, \mathbf{D} \right)$ gives an equivalent model
+<!-- * Let $\mathbf{C} = \mathbf{U} \mathbf{D} \mathbf{U}'$ be an eigen-decomposition. Then setting $\mathbf{Z}= \mathbf{U}$ and $\boldsymbol{\alpha} \sim \operatorname{N} \left( \mathbf{0}, \mathbf{D} \right)$ gives an equivalent model -->
 
-$$
-\begin{align*}
-\mathbf{y} & = \int \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta} + \mathbf{U} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right) \operatorname{N} \left( \mathbf{0}, \boldsymbol{D} \right) \, \mathrm{d} \boldsymbol{\alpha}  \\
-& = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{U} \mathbf{D} \mathbf{U}' \right) \\
-& = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{C} \right).
-\end{align*}
-$$
+<!-- $$ -->
+<!-- \begin{align*} -->
+<!-- \mathbf{y} & = \int \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta} + \mathbf{U} \boldsymbol{\alpha}, \sigma^2 \mathbf{I} \right) \operatorname{N} \left( \mathbf{0}, \boldsymbol{D} \right) \, \mathrm{d} \boldsymbol{\alpha}  \\ -->
+<!-- & = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{U} \mathbf{D} \mathbf{U}' \right) \\ -->
+<!-- & = \operatorname{N} \left( \mathbf{X} \boldsymbol{\beta}, \sigma^2 \mathbf{I} + \mathbf{C} \right). -->
+<!-- \end{align*} -->
+<!-- $$ -->
 
 <!-- ## Example: spatial regression: Simulated data -->
 
@@ -1629,18 +1613,21 @@ $$
 
 * Metropolis-Hastings, Gibbs, slice sampling, Hamiltonian Monte Carlo, etc.
 
-## Non-Gaussian spatial models
+## Correlated data
 
-* $\mathbf{z}$ is a spatial random process .
+$$
+\begin{align*}
+[\mathbf{z}, \boldsymbol{\theta}_z, \boldsymbol{\theta}_y | \mathbf{y}] & = [\mathbf{y} | \mathbf{z}, \boldsymbol{\theta}_y] [\mathbf{z} | \boldsymbol{\theta}_z] [\boldsymbol{\theta}_y]  [\boldsymbol{\theta}_z].
+\end{align*}
+$$
 
-    * $\mathbf{z} \sim \operatorname{N} (\mathbf{0}, \boldsymbol{C})$.
+* $g(\mathbf{z}) = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\eta}$ is a spatial random process .
 
-* Must sample the process model (random effect $\mathbf{z}$) directly -- cannot integrate out the process variable.
+    * $\boldsymbol{\eta} \sim \operatorname{N} (\mathbf{0}, \boldsymbol{C})$.
 
-* Computational complexity grows with $O(n^3)$.
+* Requires sampling the random effect $\boldsymbol{\eta}$ directly.
 
-* Inefficient to sample from a complicated likelihood surface.
-
+ 
 
 
 
@@ -1679,9 +1666,9 @@ $$
 
 ## Second stage estimation--[Metropolis-Hastings](https://chi-feng.github.io/mcmc-demo/app.html)
 
-1) Current state of variable $z$ at the $k$th MCMC iteration is $z^{(k)}$.
+1) Current state of variable $z$ at the $k-1$th MCMC iteration is $z^{(k-1)}$.
 
-2) Propose $z^{\star}$ from proposal distribution $[z^{\star}|z^{(k)}]$.
+2) Propose $z^{\star}$ from proposal distribution $[z^{\star}|z^{(k-1)}]$.
 
 3) Calculate MH ratio $a^{\star} = \frac{[y|z^{\star}] [z^{\star}] [z^{\star} | z^{(k-1)}]}{[y|z^{(k-1)}] [z^{(k-1)}] [z^{(k-1)} | z^{\star}]}$.
 
@@ -1768,11 +1755,22 @@ $$
 
 * Wasted computational effort to evaluate weights for unlikely samples.
 
-* Subsampled importance samples:
+## Subsampled importance samples:
 
-    * Assign a latent variable $\delta_i^{(k_1)}$ and only evaluate the importance weights when $\delta_i^{(k_1)} = 1$.
+* Generate a latent variable $\delta_i^{(k_1)}$ and only evaluate the importance weights when $\delta_i^{(k_1)} = 1$.
 
-    * Embarrassingly parallel update.
+* Embarrassingly parallel update.
+
+* Currently, the $\delta_i^{(k_1)}$ are memoryless ($iid$ sample each MCMC iteration).
+
+    * Future improvement: learn the subsample weights.
+    
+<hr style="height:180px; visibility:hidden;" />
+
+<font size="3">
+`r paste0(capture.output(print(biblio["maclaurin2014firefly"])), collapse = " ")`
+</font>
+
     
 ## Second Stage -- Alternative options
 
@@ -1987,16 +1985,16 @@ knitr::include_graphics(
 
 
 ## References {.smaller}
- 
-- <font size="2"> `r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["murray2010elliptical"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["polson2013bayesian"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["holmstrom2015bayesian"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["linderman2015dependent"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["nychka2015multiresolution"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["hefley2017basis"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["hooten2019prior"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["nolan2019comparing"])), collapse = " ")` </font>
-- <font size="2"> `r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`</font>
 
+- <font size="1."> `r paste0(capture.output(print(biblio["banerjee2008gaussian"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["murray2010elliptical"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["polson2013bayesian"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["maclaurin2014firefly"])), collapse = " ")`</font>
+- <font size="1"> `r paste0(capture.output(print(biblio["holmstrom2015bayesian"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["linderman2015dependent"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["nychka2015multiresolution"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["hefley2017basis"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["hooten2019prior"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["nolan2019comparing"])), collapse = " ")` </font>
+- <font size="1"> `r paste0(capture.output(print(biblio["tipton2019predicting"])), collapse = " ")`</font>
 
