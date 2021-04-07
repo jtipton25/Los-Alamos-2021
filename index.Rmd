@@ -123,7 +123,7 @@ biblio <- bibtex::read.bib("pg.bib")
 
 ## Setting the stage 
 
-- Spatially explicit reconstructions of climate variables is important.
+- Spatially explicit reconstructions of climate variables are important.
 
     <hr style="height:12px; visibility:hidden;" />
 
@@ -197,7 +197,7 @@ For the $i$th observation at location $\mathbf{s}$ and time $t$,
 
 $$
 \begin{align*}
-\mathbf{y}_i \left( \mathbf{s}, t \right) & = \left( y_{i1} \left( \mathbf{s}, t \right), \ldots, y_{id} \left( \mathbf{s}, t \right) \right)'
+\mathbf{y}_i \left( \mathbf{s}, t \right) & = \left( y_{i1} \left( \mathbf{s}, t \right), \ldots, y_{ij} \left( \mathbf{s}, t \right) \right)'
 \end{align*}
 $$
 
@@ -1642,7 +1642,7 @@ $$
 
 * First stage model generates an importance sampling proposal distribution for the second stage.
 
-* If properly chosen, can integrate out the latent process $\mathbf{z}$ to reduce computational cost.
+* If properly chosen, can integrate out the latent process $\boldsymbol{\eta}$ to reduce computational cost.
 
 ## First Stage
 
@@ -1798,18 +1798,6 @@ $$
 * $\boldsymbol{\eta} = \left( \eta \left(\mathbf{s}_1 \right), \ldots, \eta \left( \mathbf{s}_N \right) \right)' \sim \operatorname{N} (\mathbf{0}, \mathbf{C})$ is a random spatial process.
 
 
-## Bayesian spatial GLMs
-
-* In general, sampling a high-dimensional latent effect like $\boldsymbol{\eta}$ in BHMs is a challenging and unsolved problem.
-
-* Typical solution for the Gaussian case -- integrate out the latent variable and model the covariance.
-
-* Not possible in non-Gaussian models (GLMs).
-
-* In the two-stage model, the data distribution $[y(\mathbf{s})_i | z(\mathbf{s}_i), \boldsymbol{\theta}_y]$ does not appear in the Metropolis ratio \ref{eq:MH}.
-
-    * In the second stage posterior, one can directly integrate out the latent random variable $\boldsymbol{\eta}$ and there is no requirement to sample a high-dimensional random variable which improves MCMC mixing. 
-    
 
 ## Bayesian spatial Poisson regression
 
@@ -1848,14 +1836,14 @@ where
 
 $$
 \begin{align*}
-\lambda(\mathbf{s}_i) & \sim \operatorname{Gamma} \left( \epsilon_\lambda, \epsilon_\lambda \right).
+\tilde{\lambda}(\mathbf{s}_i) & \sim \operatorname{Gamma} \left( \alpha(y(\mathbf{s}_i)), \beta(y(\mathbf{s}_i)) \right).
 \end{align*}
 $$
 
 * For the second stage estimates to have finite variance, the first stage posterior distribution $\left[ \tilde{\lambda} \left( \mathbf{s}_i \right) | \cdot \right]$ should have heavier tails than the target posterior distribution $\left[ \lambda \left( \mathbf{s}_i \right) | \cdot \right]$. 
 
 
-* $\tilde{\lambda} \left( \mathbf{s}_i \right) \sim \operatorname{Gamma}(\epsilon_\lambda, \epsilon_\lambda)$ for some small $\epsilon_\lambda$ will produce a diffuse, analytic first-stage posterior.
+* $\tilde{\lambda} \left( \mathbf{s}_i \right) \sim \operatorname{Gamma}(\alpha(y(\mathbf{s}_i)), \beta(y(\mathbf{s}_i)))$ to ensure a diffuse, analytic first-stage posterior.
 
     * The analytic solution is beneficial because it allows for fast, efficient simulation of the first stage posterior.
 
